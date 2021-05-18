@@ -4,7 +4,7 @@
   "description": "Scan barcodes in web browsers",
   "homepage": "https://github.com/MyIsaak/zbar-wasi",
   "bugs": "https://github.com/MyIsaak/zbar-wasi/issues",
-  "main": "zbar-wasi.js",
+  "main": "dist/zbar-wasi.js",
   "browser": "dist/zbar-wasi.esm.js",
   "scripts": {
     "build": "npm-run-all build:*",
