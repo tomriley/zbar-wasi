@@ -1,6 +1,6 @@
 export { createZbar, scanImage };
 
-import zbarBinaryPath from "./zbar.wasm";
+let zbarBinaryPath = "./zbar.wasm";
 import { WASI } from "@wasmer/wasi";
 import wasiBindings from "@wasmer/wasi/lib/bindings/browser";
 import { WasmFs } from "@wasmer/wasmfs";
