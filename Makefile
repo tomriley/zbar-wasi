@@ -1,4 +1,4 @@
-CODEC_URL := https://github.com/mchehab/zbar/archive/master.tar.gz
+CODEC_URL := https://github.com/mchehab/zbar/archive/refs/tags/0.23.1.tar.gz
 CODEC_DIR := node_modules/zbar
 CODEC_OUT_RELATIVE := zbar/.libs/libzbar.a
 CODEC_OUT := $(addprefix $(CODEC_DIR)/, $(CODEC_OUT_RELATIVE))
@@ -7,7 +7,7 @@ OUT_WASM := $(OUT_JS:.js=.wasm)
 
 all: $(OUT_JS)
 
-zbar.wasm: zbar.c $(CODEC_OUT)
+zbar.wasm: zbar.c i64_polyfill.c $(CODEC_OUT)
 	clang \
 		-v \
 	  -I $(CODEC_DIR)/include \
@@ -15,6 +15,7 @@ zbar.wasm: zbar.c $(CODEC_OUT)
 		-nostartfiles \
 		${LDFLAGS} \
 	  -Wl,--no-entry \
+		-Wl,--allow-undefined \
 		-o $@ \
 		$+
 

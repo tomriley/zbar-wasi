@@ -6,6 +6,8 @@ import wasiBindings from "@wasmer/wasi/lib/bindings/browser";
 import { WasmFs } from "@wasmer/wasmfs";
 
 const wasmFs = new WasmFs();
+import { wrapI64Polyfill } from "./i64_polyfill";
+
 let wasi = new WASI({
   args: [],
   env: {},
@@ -15,17 +17,20 @@ let wasi = new WASI({
   }
 });
 
+const i64Polyfill = wrapI64Polyfill(wasi.wasiImport);
+
 const getImports = wasi => {
   const {
-    clock_time_get,
+    //clock_time_get,
     fd_close,
     fd_seek,
     fd_write,
   } = wasi.wasiImport;
 
   return {
+    i64_polyfill: i64Polyfill,
     wasi_snapshot_preview1: {
-      clock_time_get,
+      //clock_time_get,
       fd_close,
       fd_seek,
       fd_write,
@@ -39,7 +44,7 @@ let ZBAR = {};
 const createGrayscaleBuffer = ({ buffer, width, height }) => {
   const len = width * height;
   const ptrBuff = ZBAR.malloc(len);
-  const heap = new Uint8Array(ZBAR.memory.buffer); 
+  const heap = new Uint8Array(ZBAR.memory.buffer);
   const data = new Uint8Array(buffer);
   for (let i = 0; i < len; i++) {
     const i4 = i * 4;
@@ -101,7 +106,7 @@ const useDefaultScannerIfNull = ptrScanner => {
 
 const scanImage = (imgData, ptrScanner) => {
   ptrScanner = useDefaultScannerIfNull(ptrScanner);
-  const ptrImage = createZbarImage(imgData); 
+  const ptrImage = createZbarImage(imgData);
   const nResults = ZBAR.ImageScanner_scan(ptrScanner, ptrImage);
   const result = getScanResult(ptrImage);
   ZBAR.Image_destroy(ptrImage);
@@ -109,9 +114,12 @@ const scanImage = (imgData, ptrScanner) => {
 };
 
 const createZbar = async ({ wasmpath = zbarBinaryPath } = {}) => {
-  const file = fetch(wasmpath);
+  const response = await fetch(wasmpath);
+  const buffer = await response.arrayBuffer();
   const imports = getImports(wasi);
-  const { instance } = await WebAssembly.instantiateStreaming(file, imports);
+  //const { instance } = await WebAssembly.instantiateStreaming(file, imports);
+  const module = await WebAssembly.compile(buffer);
+  const instance = await WebAssembly.instantiate(module, imports);
   wasi.memory = instance.exports.memory;
   ZBAR = instance.exports;
   return instance.exports;

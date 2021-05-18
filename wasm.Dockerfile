@@ -16,8 +16,9 @@ RUN apk add clang libtool make pkgconf curl wget autoconf gettext-dev git automa
   && mkdir -p $SYSROOT && tar -xf "wasi-sysroot-11.0.tar.gz" --strip 1 -C $SYSROOT \
   && rm -f "wasi-sysroot-11.0.tar.gz" \
   && wget -q "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-11/libclang_rt.builtins-wasm32-wasi-11.0.tar.gz" \
-  && mkdir /usr/lib/clang/10.0.0/lib/ \
-  && tar -xf "libclang_rt.builtins-wasm32-wasi-11.0.tar.gz" --strip 1 -C "/usr/lib/clang/10.0.0/lib/" \
+  && mkdir /usr/lib/clang/10.0.1/lib/ \
+  && ls -l /usr/lib/clang/ \
+  && tar -xf "libclang_rt.builtins-wasm32-wasi-11.0.tar.gz" --strip 1 -C "/usr/lib/clang/10.0.1/lib/" \
   && rm -f "libclang_rt.builtins-wasm32-wasi-11.0.tar.gz" \
   && mkdir /src && adduser -h /src -D alpine
 
