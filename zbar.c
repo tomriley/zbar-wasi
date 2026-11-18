@@ -101,3 +101,18 @@ __attribute__((export_name("Image_get_symbols")))
 const zbar_symbol_set_t* Image_get_symbols(zbar_image_t* image) {
   return zbar_image_get_symbols(image);
 }
+
+__attribute__((export_name("Symbol_get_loc_size")))
+unsigned int Symbol_get_loc_size(const zbar_symbol_t *symbol) {
+  return zbar_symbol_get_loc_size(symbol);
+}
+
+__attribute__((export_name("Symbol_get_loc_x")))
+int Symbol_get_loc_x(const zbar_symbol_t *symbol, unsigned int index) {
+  return zbar_symbol_get_loc_x(symbol, index);
+}
+
+__attribute__((export_name("Symbol_get_loc_y")))
+int Symbol_get_loc_y(const zbar_symbol_t *symbol, unsigned int index) {
+  return zbar_symbol_get_loc_y(symbol, index);
+}

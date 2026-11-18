@@ -1,5 +1,3 @@
-var zbarBinaryPath = "./dist/zbar.wasm";
-
 var global$1 = (typeof global !== "undefined" ? global :
             typeof self !== "undefined" ? self :
             typeof window !== "undefined" ? window : {});
@@ -5108,6 +5106,8 @@ function wrapI64Polyfill(original) {
   };
 }
 
+let zbarBinaryPath = "./zbar.wasm";
+
 const wasmFs = new sf();
 
 let wasi = new dc$1({
@@ -5194,6 +5194,27 @@ const getScanResult = ptrImage => {
   return results;
 };
 
+// Each symbol's data with the points zbar found it at, in image pixels.
+const getScanSymbols = ptrImage => {
+  const symbols = [];
+  const heap8 = new Uint8Array(ZBAR.memory.buffer);
+  const decoder = new TextDecoder("utf-8");
+  let symbol = ZBAR.ImageScanner_first_symbol(ptrImage);
+  while (symbol !== 0) {
+    const ptrResult = ZBAR.ImageScanner_get_data(symbol);
+    const len = heap8.subarray(ptrResult).indexOf(0);
+    const data = decoder.decode(heap8.subarray(ptrResult, ptrResult + len));
+    const points = [];
+    for (let i = 0; i < ZBAR.Symbol_get_loc_size(symbol); i++) {
+      points.push({ x: ZBAR.Symbol_get_loc_x(symbol, i), y: ZBAR.Symbol_get_loc_y(symbol, i) });
+    }
+    symbols.push({ data, points });
+    symbol = ZBAR.ImageScanner_next_symbol(symbol);
+  }
+
+  return symbols;
+};
+
 let ptrScannerDefault;
 const useDefaultScannerIfNull = ptrScanner => {
   if (ptrScanner) {
@@ -5214,6 +5235,15 @@ const scanImage = (imgData, ptrScanner) => {
   return result;
 };
 
+const scanSymbols = (imgData, ptrScanner) => {
+  ptrScanner = useDefaultScannerIfNull(ptrScanner);
+  const ptrImage = createZbarImage(imgData);
+  ZBAR.ImageScanner_scan(ptrScanner, ptrImage);
+  const symbols = getScanSymbols(ptrImage);
+  ZBAR.Image_destroy(ptrImage);
+  return symbols;
+};
+
 const createZbar = async ({ wasmpath = zbarBinaryPath } = {}) => {
   const response = await fetch(wasmpath);
   const buffer = await response.arrayBuffer();
@@ -5226,5 +5256,4 @@ const createZbar = async ({ wasmpath = zbarBinaryPath } = {}) => {
   return instance.exports;
 };
 
-export { createZbar, scanImage };
-//# sourceMappingURL=zbar-wasi.esm.js.map
+export { createZbar, scanImage, scanSymbols };

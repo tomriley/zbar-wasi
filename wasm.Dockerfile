@@ -1,4 +1,5 @@
-FROM alpine:latest
+# 3.13 is the last Alpine with llvm10, which the clang 10.0.1 paths below expect.
+FROM alpine:3.13
 
 ENV SYSROOT "/opt/wasi-sysroot"
 ENV RANLIB "llvm-ranlib"
